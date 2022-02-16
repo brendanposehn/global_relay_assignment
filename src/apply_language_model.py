@@ -8,7 +8,7 @@ class LanguageFinderModelClient:
 
     _model, _utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
                                 model='silero_lang_detector',
-                                force_reload=True)
+                                force_reload=False)
     _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
     _sampling_rate = 16000
 
