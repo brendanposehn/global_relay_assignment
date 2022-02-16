@@ -38,19 +38,37 @@ class WAVCrawler:
 
     def _handleWAVs(self, url):
         language_url = WAVCrawler._base_url[:-12] + url
-        print(language_url)
         f = requests.get(language_url, headers = WAVCrawler._headers)
         wav_list = []
         soup = BeautifulSoup(f.content, 'lxml')
         url_text = soup.get_text().splitlines()
+        file_names = []
+
+        if(os.path.isfile(os.path.join(WAVCrawler._data_path, 'metadata.csv'))):
+            prev_wav_df = pd.read_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'))
+            file_names = prev_wav_df['File'].values.tolist()
+        else:
+            prev_wav_df = pd.DataFrame(columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description', 'has_speech'])
+        
+        if('india' in language_url):
+            language_url = language_url.replace('india', 'hindi') # TODO get non-hardcoded solution
+        
         for i in range(0, len(url_text)):
             if(".wav" in url_text[i]):
+                if(url_text[i] in file_names):
+                    continue # if more .wavs have been added to the site we still catch them
+
                 wav_url = language_url[:-5] + "/" + url_text[i]
                 req = Request(wav_url, headers = WAVCrawler._headers)
                 page = urlopen(req)
-                with page as f:
-                    open(os.path.join(WAVCrawler._data_path, url_text[i]), 'wb').write(f.read())
-                wav_list.append([url_text[i], url_text[i+1], url_text[i+2], url_text[i+3], url_text[i+4], " "])
 
-        wav_df = pd.DataFrame(wav_list, columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description', 'has_speech'])
-        wav_df.to_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'), index=False)
+                with page as f:
+                    with open(os.path.join(WAVCrawler._data_path, url_text[i]), 'wb') as f2:
+                        f2.write(f.read())
+                        
+                wav_list.append([url_text[i], url_text[i+1], url_text[i+2], url_text[i+3], url_text[i+4], " "])
+        
+        if(len(wav_list) is not 0):
+            wav_df = pd.DataFrame(wav_list, columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description', 'has_speech'])
+            wav_df = wav_df.append(prev_wav_df)
+            wav_df.to_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'), index=False)
