@@ -8,3 +8,5 @@ Build and Running instructions:
 5. From the same directory as above, run command: docker run -it -v <path/to/cloned/directory>:/root/data --name scraper_cntnr scraper_image
 6. From the same directory as above, run command: start -i scraper_cntnr
 7. After the process has completed, the 'data' folder will be populated
+
+Thank you!
