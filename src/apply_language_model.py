@@ -6,9 +6,9 @@ import os
 
 class ModelApplicantBase:
 
-    def __init__(self, model_repo, model_name):
-        self._model, self._utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
-                            model='silero_lang_detector',
+    def __init__(self, model_location, model_name):
+        self._model, self._utils = torch.hub.load(repo_or_dir=model_location,
+                            model=model_name,
                             force_reload=True) #can this be false?
 
     def processMetadata(self):
