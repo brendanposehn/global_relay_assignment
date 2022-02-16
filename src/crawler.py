@@ -6,6 +6,15 @@ from urllib.request import Request, urlopen
 import os 
 
 class WAVCrawler:
+    '''
+        Class used for crawling and scrubbing data from: https://www.voiptroubleshooter.com/open_speech/index.html
+
+        Attributes:
+            _base_url: url to crawl and scrub through
+            _headers: used for analyzing web pages
+            _language_sub_pages: list containing all possible language headers findable at _base_url
+            _data_path: path to the data folder where output file is stored
+    '''
 
     _base_url = 'https://www.voiptroubleshooter.com/open_speech/' 
     _headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 QIHU 360SE'}
@@ -15,11 +24,11 @@ class WAVCrawler:
     def __init__(self):
         self._urls = []
 
-    # @staticmethod
-    def _findCharOccurrences(self, s, ch):
-        return [i for i, letter in enumerate(s) if letter == ch]
-
     def _produceURLs(self):
+        '''
+            Crawls through site to populate _urls such that all language sub-pages can be linked to.
+            All output _url entries in form: 'open_speech/<language>.html
+        '''
         f = requests.get(WAVCrawler._base_url, headers = WAVCrawler._headers)
         soup = BeautifulSoup(f.content, 'lxml')
         url_text = soup.get_text().splitlines()
@@ -28,7 +37,7 @@ class WAVCrawler:
             for language_page in WAVCrawler._language_sub_pages:
                 if language_page in line:
                     line_str = str(line)
-                    quote_occurences = self._findCharOccurrences(line_str, '"')
+                    quote_occurences = [i for i, letter in enumerate(line_str) if letter == '"']
                     url = line_str[quote_occurences[0]+1:quote_occurences[1]]
                     if("open_speech" in url):
                         url = url[3:]
@@ -37,6 +46,10 @@ class WAVCrawler:
                     self._urls.append(url)
 
     def _handleWAVs(self, url):
+        '''
+            For each inputted url (which is a sub-page from the main site), saves all .wav files
+            and appends to/initializes metadata.csv with the metadata from each .wav.
+        '''
         language_url = WAVCrawler._base_url[:-12] + url
         f = requests.get(language_url, headers = WAVCrawler._headers)
         wav_list = []
@@ -74,6 +87,9 @@ class WAVCrawler:
             wav_df.to_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'), index=False)
 
     def produceMetaData(self):
+        '''
+            API call to produce metadata.csv and store all .wav files on https://www.voiptroubleshooter.com/open_speech/index.html
+        '''
         self._produceURLs()
         for url in self._urls:
             self._handleWAVs(url)
