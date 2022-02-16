@@ -16,19 +16,24 @@ class SpeechTimingModelClient:
         (get_speech_timestamps, _, read_audio, *_) = SpeechTimingModelClient._utils
         metadata_df = pd.read_csv(os.path.join(SpeechTimingModelClient._data_path, "metadata.csv"))
         total_rows = metadata_df.shape[0]
-
-        speech_timing_info = []
+        has_speech_list = []
+        start_list = []
+        end_list = []
         for i in range(0, total_rows):
             file_example = os.path.join(SpeechTimingModelClient._data_path, 'wavs', metadata_df.at[i, 'File'])
             try:
                 wav = read_audio(file_example, sampling_rate=SpeechTimingModelClient._sampling_rate)
             except:
-                speech_timing_info.append(metadata_df.at[i, 'File'], "ERROR", "ERROR", "ERROR")
+                has_speech_list.append('ERROR')
+                start_list.append('ERROR')
+                end_list.append('ERROR')
                 continue
 
             speech_timestamps = get_speech_timestamps(wav, SpeechTimingModelClient._model, sampling_rate=SpeechTimingModelClient._sampling_rate)
             if(not speech_timestamps):
-                speech_timing_info.append(metadata_df.at[i, 'File'], "false", "", "")
+                has_speech_list.append('false')
+                start_list.append('')
+                end_list.append('')
                 continue
 
             starts = ""
@@ -38,8 +43,10 @@ class SpeechTimingModelClient:
                 ends += str(pair['end']) + ":"
             starts = starts[:-1]
             ends = ends[:-1]
-
-            speech_timing_info.append([metadata_df.at[i, 'File'], "true", starts, ends])
-        
-        speech_timing_df = pd.DataFrame(speech_timing_info, columns=['File', 'has_speech', 'speech_starts', 'speech_ends'])
-        speech_timing_df.to_csv(os.path.join(SpeechTimingModelClient._data_path, "speech_timing_output.csv"), index=False)
+            has_speech_list.append('true')
+            start_list.append(starts)
+            end_list.append(ends)
+        metadata_df['has_speech'] = has_speech_list
+        metadata_df['speech_starts'] = start_list
+        metadata_df['speech_ends'] = end_list
+        metadata_df.to_csv(os.path.join(SpeechTimingModelClient._data_path, "speech_timing_output.csv"), index=False)
