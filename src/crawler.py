@@ -48,7 +48,7 @@ class WAVCrawler:
             prev_wav_df = pd.read_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'))
             file_names = prev_wav_df['File'].values.tolist()
         else:
-            prev_wav_df = pd.DataFrame(columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description', 'has_speech'])
+            prev_wav_df = pd.DataFrame(columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description'])
         
         if('india' in language_url):
             language_url = language_url.replace('india', 'hindi') # TODO get non-hardcoded solution
@@ -63,12 +63,12 @@ class WAVCrawler:
                 page = urlopen(req)
 
                 with page as f:
-                    with open(os.path.join(WAVCrawler._data_path, url_text[i]), 'wb') as f2:
+                    with open(os.path.join(WAVCrawler._data_path, 'wavs', url_text[i]), 'wb') as f2:
                         f2.write(f.read())
                         
-                wav_list.append([url_text[i], url_text[i+1], url_text[i+2], url_text[i+3], url_text[i+4], " "])
+                wav_list.append([url_text[i], url_text[i+1], url_text[i+2], url_text[i+3], url_text[i+4]])
         
         if(len(wav_list) is not 0):
-            wav_df = pd.DataFrame(wav_list, columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description', 'has_speech'])
-            wav_df = wav_df.append(prev_wav_df)
+            wav_df = pd.DataFrame(wav_list, columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description'])
+            wav_df = pd.concat([wav_df, prev_wav_df], ignore_index=True)
             wav_df.to_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'), index=False)
