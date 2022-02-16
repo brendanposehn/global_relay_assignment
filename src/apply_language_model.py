@@ -4,15 +4,28 @@ from IPython.display import Audio
 from pprint import pprint
 import os
 
-class ModelApplicantBase:
+class LanguageFinderModelClient:
 
-    def __init__(self, model_location, model_name):
-        self._model, self._utils = torch.hub.load(repo_or_dir=model_location,
-                            model=model_name,
-                            force_reload=True) #can this be false?
+    _model, _utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                                model='silero_lang_detector',
+                                force_reload=True)
+    _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')
+    _sampling_rate = 16000
 
     def processMetadata(self):
-        raise NotImplementedError('You need to define a speak method!')
+        get_language, read_audio, *_ = LanguageFinderModelClient._utils
+        metadata_df = pd.read_csv(os.path.join(LanguageFinderModelClient._data_path, "metadata.csv"))
+        total_rows = metadata_df.shape[0]
+        languages = []
+        for i in range(0, total_rows):
+            file_example = os.path.join(LanguageFinderModelClient._data_path, 'wavs', metadata_df.at[i, 'File'])
+            try:
+                wav = read_audio(file_example)
+            except:
+                languages.append("ERROR")
+                continue
+            language = get_language(wav, LanguageFinderModelClient._model)
+            languages.append(language)
 
-    def processOutput(self):
-        raise NotImplementedError('You need to define a speak method!')
+        metadata_df['Language'] = languages
+        metadata_df.to_csv(os.path.join(LanguageFinderModelClient._data_path, "language_output.csv"), index=False)
