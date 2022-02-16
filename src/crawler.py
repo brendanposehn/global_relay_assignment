@@ -68,7 +68,12 @@ class WAVCrawler:
                         
                 wav_list.append([url_text[i], url_text[i+1], url_text[i+2], url_text[i+3], url_text[i+4]])
         
-        if(len(wav_list) is not 0):
+        if(len(wav_list) != 0):
             wav_df = pd.DataFrame(wav_list, columns=['File', 'M/F', 'Format', 'Sample Rate', 'Description'])
             wav_df = pd.concat([wav_df, prev_wav_df], ignore_index=True)
             wav_df.to_csv(os.path.join(WAVCrawler._data_path, 'metadata.csv'), index=False)
+
+    def produceMetaData(self):
+        self._produceURLs()
+        for url in self._urls:
+            self._handleWAVs(url)

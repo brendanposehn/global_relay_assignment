@@ -23,5 +23,9 @@ class WAVCrawlerTest(unittest.TestCase):
             self.crawler._handleWAVs(url)
         self.assertTrue(True) # TODO add more in-depth check 
 
+    def test_handleWAVS(self):
+        self.crawler.produceMetaData()
+        self.assertTrue(True)
+
 if __name__ == '__main__':
     unittest.main()
