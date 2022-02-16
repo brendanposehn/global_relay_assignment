@@ -29,6 +29,7 @@ class SpeechTimingModelClient:
                 speech_starts: ':'-delimited values denoting when speech began in the file
                 speech_ends: ':'-delimited values denoting when speech ended in the file
          '''
+        print('Applying speech timing model')
         (get_speech_timestamps, _, read_audio, *_) = SpeechTimingModelClient._utils
         metadata_df = pd.read_csv(os.path.join(SpeechTimingModelClient._data_path, "metadata.csv"))
         total_rows = metadata_df.shape[0]

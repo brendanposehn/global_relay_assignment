@@ -29,6 +29,7 @@ class WAVCrawler:
             Crawls through site to populate _urls such that all language sub-pages can be linked to.
             All output _url entries in form: 'open_speech/<language>.html
         '''
+        print('Crawling through site')
         f = requests.get(WAVCrawler._base_url, headers = WAVCrawler._headers)
         soup = BeautifulSoup(f.content, 'lxml')
         url_text = soup.get_text().splitlines()
@@ -45,11 +46,12 @@ class WAVCrawler:
                         url = "open_speech/" + url
                     self._urls.append(url)
 
-    def _handleWAVs(self, url):
+    def _scrapeWAVs(self, url):
         '''
             For each inputted url (which is a sub-page from the main site), saves all .wav files
             and appends to/initializes metadata.csv with the metadata from each .wav.
         '''
+        print('Scraping .WAV files from site')
         language_url = WAVCrawler._base_url[:-12] + url
         f = requests.get(language_url, headers = WAVCrawler._headers)
         wav_list = []
@@ -92,4 +94,4 @@ class WAVCrawler:
         '''
         self._produceURLs()
         for url in self._urls:
-            self._handleWAVs(url)
+            self._scrapeWAVs(url)

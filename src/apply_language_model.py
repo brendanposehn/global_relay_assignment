@@ -28,6 +28,7 @@ class LanguageFinderModelClient:
             and generates a new csv by appending a language colummn onto metadata.csv
             and storing it as language_output.csv
          '''
+        print('Applying language classifying model')
         get_language, read_audio, *_ = LanguageFinderModelClient._utils
         metadata_df = pd.read_csv(os.path.join(LanguageFinderModelClient._data_path, "metadata.csv"))
         total_rows = metadata_df.shape[0]

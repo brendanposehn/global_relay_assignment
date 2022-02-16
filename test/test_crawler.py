@@ -20,7 +20,7 @@ class WAVCrawlerTest(unittest.TestCase):
     def test_handleWAVS(self):
         self.crawler._produceURLs()
         for url in self.crawler._urls:
-            self.crawler._handleWAVs(url)
+            self.crawler._scrapeWAVs(url)
         self.assertTrue(True) # TODO add more in-depth check 
 
     def test_handleWAVS(self):
